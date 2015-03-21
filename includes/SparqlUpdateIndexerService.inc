@@ -17,9 +17,16 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
       '#type' => 'textfield',
       '#title' => t('SPARQL Update URI'),
       '#description' => t('Enter the URI of the SPARQL Update service.'),
-      '#default_value' => $this->options['sparql_update_uri'],
+      '#default_value' => isset($this->options['sparql_update_uri']) ? $this->options['sparql_update_uri'] : '',
       '#required' => TRUE,
     );
+    $form['named_graph_uri'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Named graph URI'),
+      '#description' => t('Enter the URI of Named Graph where triples will be grouped'),
+      '#default_value' => isset($this->options['named_graph_uri']) ? $this->options['named_graph_uri'] : '',
+      '#required' => TRUE,
+    );    
     return $form;
   }
 
@@ -29,6 +36,9 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
       form_error($form['sparql_update_uri'], 'Please enter a valid URL.');
     }
 
+    if (!filter_var($values['named_graph_uri'], FILTER_VALIDATE_URL)) {
+      form_error($form['named_graph_uri'], 'Please enter a valid URL.');
+    }
   }
 
   /**
@@ -133,7 +143,7 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
                 $graph->add($graph_uri, $property, $value);
               }
             }
-            $client->insert($graph, $resource . '.rdf');
+            $client->insert($graph, $this->options['named_graph_uri']);
           }
 
         }
@@ -167,10 +177,7 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
       try {
         if ($ids = 'all') {
           // delete all items.
-          $client = new EasyRdf_Sparql_Client(
-            $this->options['sparql_query_uri'],
-            $this->options['sparql_update_uri']
-          );
+          $client = new EasyRdf_Sparql_Client($this->options['sparql_update_uri']);
           $client->clear('ALL');
         }
         elseif (is_array($ids)) {
