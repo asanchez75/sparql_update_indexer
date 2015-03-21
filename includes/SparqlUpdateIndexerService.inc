@@ -178,10 +178,10 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
         if ($ids = 'all') {
           // delete all items.
           $client = new EasyRdf_Sparql_Client($this->options['sparql_update_uri']);
-          $client->clear('ALL');
+          $client->clear($this->options['named_graph_uri'], true);
         }
         elseif (is_array($ids)) {
-          $store = new EasyRdf_GraphStore($this->options['update_uri']);
+          $store = new EasyRdf_GraphStore($this->options['sparql_update_uri']);
           foreach ($ids as $id) {
             $rdf_model = rdfx_get_rdf_model($index->item_type, $id);
             // delete one item.
