@@ -132,7 +132,6 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
         // do something with $rdf->uri and $rdf->index.
         // The save method should throw an exception on failure.
         if (easyrdf()) {
-
           $resource = $rdf_model->uri;
           $client = new EasyRdf_Sparql_Client($this->options['sparql_update_uri']);
 
@@ -146,6 +145,9 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
             $client->insert($graph, $this->options['named_graph_uri']);
           }
 
+        }
+        else {
+          drupal_set_message(t('Please, install and configure installation directory for Easyrdf library'), 'error');
         }
       } catch (Exception $e) {
         watchdog_exception('sparql_update_indexer', $e);
