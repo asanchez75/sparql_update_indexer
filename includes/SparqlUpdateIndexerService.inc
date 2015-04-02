@@ -133,7 +133,7 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
         // The save method should throw an exception on failure.
         if (easyrdf()) {
           $resource = $rdf_model->uri;
-          $client = new EasyRdf_Sparql_Client($this->options['sparql_update_uri']);
+          $client = new EasyRdf_Sparql_Client2($this->options['sparql_update_uri']);
 
           foreach ($rdf_model->index as $graph_uri => $graph_data) {
             $graph = new EasyRdf_Graph($graph_uri);
@@ -179,7 +179,7 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
       try {
         if ($ids = 'all') {
           // delete all items.
-          $client = new EasyRdf_Sparql_Client($this->options['sparql_update_uri']);
+          $client = new EasyRdf_Sparql_Client2($this->options['sparql_update_uri']);
           $client->clear($this->options['named_graph_uri'], true);
         }
         elseif (is_array($ids)) {

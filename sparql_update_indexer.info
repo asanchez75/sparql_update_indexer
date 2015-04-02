@@ -10,3 +10,4 @@ core = 7.x
 version = 0.1
 
 files[] = includes/SparqlUpdateIndexerService.inc
+files[] = includes/EasyRdf_Sparql_Client.inc
