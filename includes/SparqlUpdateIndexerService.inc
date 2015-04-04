@@ -26,7 +26,14 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
       '#description' => t('Enter the URI of Named Graph where triples will be grouped'),
       '#default_value' => isset($this->options['named_graph_uri']) ? $this->options['named_graph_uri'] : '',
       '#required' => TRUE,
-    );    
+    );
+    $form['base_uri'] = array(
+      '#type' => 'textfield',
+      '#title' => t('base URI'),
+      '#description' => t('Enter base URI for RDF triples'),
+      '#default_value' => isset($this->options['base_uri']) ? $this->options['base_uri'] : '',
+      '#required' => TRUE,
+    );        
     return $form;
   }
 
@@ -134,12 +141,22 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
         if (easyrdf()) {
           $resource = $rdf_model->uri;
           $client = new EasyRdf_Sparql_Client2($this->options['sparql_update_uri']);
-
+          
           foreach ($rdf_model->index as $graph_uri => $graph_data) {
+          	// if base uri needs to be changed
+          	if (!empty($this->options['base_uri'])) {
+          	  $graph_uri = $this->replace_base_uri($graph_uri, $this->options['base_uri']);
+          	}
             $graph = new EasyRdf_Graph($graph_uri);
             foreach ($graph_data as $property => $values) {
               foreach ($values as $value) {
-                $graph->add($graph_uri, $property, $value);
+              	// if Valeria's patch is there
+                if(is_string($value['value'])) {
+                  $graph->add($graph_uri, $property, $value['value']);
+            	}
+            	elseif(is_string($value)) {
+                  $graph->add($graph_uri, $property, $value);
+            	}
               }
             }
             $client->insert($graph, $this->options['named_graph_uri']);
@@ -213,5 +230,10 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
    */
   public function search(SearchApiQueryInterface $query) {
     throw new SearchApiException(t('The Sparql Update Indexer service does not support search. Please query the SPARQL endpoint directly if the RDF store provides such a service.'));
+  }
+
+  public function replace_base_uri($old_uri, $new_uri) {
+    $parse_url = parse_url($old_uri);
+    return trim($new_uri, '\/') . $parse_url['path'];
   }
 }
