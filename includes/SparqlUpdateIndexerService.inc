@@ -159,9 +159,14 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
             	}
               }
             }
-            $client->insert($graph, $this->options['named_graph_uri']);
+            try {
+              $client->insert($graph, $this->options['named_graph_uri']);
+            }
+            catch (Exception $e) {
+              unset($items[$id]);
+              throw new Exception('Error parsing triples in ' . $graph_uri . '. See details: ' . $e->getMessage());
+            }
           }
-
         }
         else {
           drupal_set_message(t('Please, install and configure installation directory for Easyrdf library'), 'error');
@@ -170,6 +175,7 @@ class SparqlUpdateIndexerService extends SearchApiAbstractService {
         watchdog_exception('sparql_update_indexer', $e);
       }
     }
+
     return array_keys($items);
   }
 
